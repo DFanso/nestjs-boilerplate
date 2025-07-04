@@ -7,6 +7,7 @@ import {
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
+import { CustomExceptionFilter } from './utils/exception-filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -33,6 +34,8 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.useGlobalFilters(new CustomExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('Boilerplate')
