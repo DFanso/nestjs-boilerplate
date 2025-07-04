@@ -10,30 +10,32 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    envFilePath: '.env',
-    isGlobal: true,
-    validationSchema: Joi.object({
-      NODE_ENV: Joi.string().required(),
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string().required(),
+      }),
     }),
-  }),
-  ClsModule.forRoot({
-    middleware: {
-      mount: true,
-      setup: (cls, req, res) => {
-        const requestId = ulid();
-        cls.set('x-request-id', requestId);
-        res.setHeader('X-Request-ID', requestId);
+    ClsModule.forRoot({
+      middleware: {
+        mount: true,
+        setup: (cls, req, res) => {
+          const requestId = ulid();
+          cls.set('x-request-id', requestId);
+          res.setHeader('X-Request-ID', requestId);
+        },
       },
-    },
-  }),
+    }),
 
-  ThrottlerModule.forRoot([{
-    ttl: 6000,
-    limit: 10,
-  }]),
-  
-],
+    ThrottlerModule.forRoot([
+      {
+        ttl: 6000,
+        limit: 10,
+      },
+    ]),
+  ],
   controllers: [AppController],
   providers: [
     AppService,
