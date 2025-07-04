@@ -8,6 +8,8 @@ import {
   VersioningType,
 } from '@nestjs/common';
 import { CustomExceptionFilter } from './utils/exception-filter';
+import helmet from 'helmet';
+import * as compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -36,6 +38,13 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new CustomExceptionFilter());
+
+  app.use(helmet());
+  app.use(compression());
+  app.enableCors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
+    credentials: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Boilerplate')
