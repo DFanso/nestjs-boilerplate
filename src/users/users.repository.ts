@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User, Role, UserRole } from '../../generated/prisma';
+import { User, Role, UserRole, Prisma } from '../../generated/prisma';
 import { CreateUserDto } from './dto/create-user.dto';
 
 // Type for User with roles included (what this repository actually returns)
@@ -41,6 +41,15 @@ export class UsersRepository {
   async findById(id: string): Promise<UserWithRoles | null> {
     return this.prisma.user.findUnique({
       where: { id },
+      include: {
+        roles: true,
+      },
+    });
+  }
+
+  async findOne(filter: Prisma.UserWhereInput): Promise<UserWithRoles | null> {
+    return this.prisma.user.findFirst({
+      where: filter,
       include: {
         roles: true,
       },

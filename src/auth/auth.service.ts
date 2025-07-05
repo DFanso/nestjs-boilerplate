@@ -14,10 +14,8 @@ export class AuthService {
   ) {}
 
   async register(createUserDto: CreateUserDto): Promise<{ user: Omit<UserWithRoles, 'password'>; access_token: string }> {
-    // Business logic: Create user through users service
     const user = await this.usersService.createUser(createUserDto);
     
-    // Business logic: Generate JWT token
     const payload = { 
       email: user.email, 
       sub: user.id,
@@ -33,14 +31,12 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<{ user: Omit<UserWithRoles, 'password'>; access_token: string }> {
-    // Business logic: Validate user credentials
     const user = await this.usersService.validateUserPassword(loginDto.email, loginDto.password);
     
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Business logic: Generate JWT token
     const payload = { 
       email: user.email, 
       sub: user.id,
@@ -55,20 +51,8 @@ export class AuthService {
     };
   }
 
-  async validateUser(email: string, pass: string): Promise<Omit<User, 'password'> | null> {
-    // Business logic: Validate user for passport strategy
-    const user = await this.usersService.validateUserPassword(email, pass);
-    
-    if (user) {
-      const { password, ...result } = user;
-      return result;
-    }
-    return null;
-  }
-
   async getProfile(userId: string): Promise<Omit<User, 'password'>> {
-    // Business logic: Get user profile
-    const user = await this.usersService.findById(userId);
+    const user = await this.usersService.findOne({ id: userId });
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }

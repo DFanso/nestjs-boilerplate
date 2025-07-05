@@ -37,6 +37,10 @@ export class UsersService {
     return user;
   }
 
+  async findOne(filter: { [key: string]: any }): Promise<UserWithRoles | null> {
+    return this.usersRepository.findOne(filter);
+  }
+
   async updateUser(id: string, updateData: Partial<User>): Promise<UserWithRoles> {
     // Business logic: Ensure user exists
     await this.findById(id);
