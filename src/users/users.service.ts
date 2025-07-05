@@ -9,16 +9,13 @@ export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserWithRoles> {
-    // Business logic: Check if user already exists
     const existingUser = await this.usersRepository.existsByEmail(createUserDto.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
-    // Business logic: Hash password
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // Delegate database operation to repository
     return this.usersRepository.create({
       ...createUserDto,
       password: hashedPassword,
