@@ -40,7 +40,7 @@ A production-ready NestJS boilerplate with JWT authentication, Prisma ORM, Supab
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/DFanso/nestjs-boilerplate
    cd nestjs-boilerplate
    ```
 
