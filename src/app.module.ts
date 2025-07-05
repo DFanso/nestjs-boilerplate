@@ -22,6 +22,9 @@ import { UsersModule } from './users/users.module';
         NODE_ENV: Joi.string().required(),
         JWT_PRIVATE_KEY_PATH: Joi.string().required(),
         JWT_PUBLIC_KEY_PATH: Joi.string().required(),
+        ALLOWED_ORIGINS: Joi.string().required().default('http://localhost:3000'),
+        DIRECT_URL: Joi.string().required(),
+        DATABASE_URL: Joi.string().required(),
       }),
     }),
     ClsModule.forRoot({
