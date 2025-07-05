@@ -10,6 +10,7 @@ import {
 import { CustomExceptionFilter } from './utils/exception-filter';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -56,6 +57,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('doc', app, document);
   app.enableCors();
+
+  const prismaService = app.get(PrismaService);
+  await prismaService.enableShutdownHooks(app);
 
   await app.listen(9000);
 }
