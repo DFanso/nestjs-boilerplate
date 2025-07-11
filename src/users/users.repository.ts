@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User, Role, UserRole, Prisma } from '../../generated/prisma';
+import { User, Role, UserRole, Prisma } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 
 export type UserWithRoles = User & { roles: UserRole[] };
