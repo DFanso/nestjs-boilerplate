@@ -202,7 +202,7 @@ npx prisma migrate dev --name add_username_field
 Create a seed script `prisma/seed.ts`:
 
 ```typescript
-import { PrismaClient, Role } from '../generated/prisma';
+import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
