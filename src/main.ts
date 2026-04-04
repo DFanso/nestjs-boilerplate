@@ -5,11 +5,14 @@ import { useRequestLogging } from './utils/request-logging';
 import {
   BadRequestException,
   ValidationPipe,
+  HttpStatus,
+  UnprocessableEntityException,
   VersioningType,
 } from '@nestjs/common';
 import { CustomExceptionFilter } from './utils/exception-filter';
+import { ResponseInterceptor } from './utils/response.interceptor';
 import helmet from 'helmet';
-import * as compression from 'compression';
+import compression = require('compression');
 import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
@@ -29,15 +32,21 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
       transform: true,
       exceptionFactory: (errors) => {
-        const messages = errors.map((error) => ({
+        const details = errors.map((error) => ({
           property: error.property,
           constraints: error.constraints,
         }));
-        return new BadRequestException(messages);
+        return new UnprocessableEntityException({
+          statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          error: 'Unprocessable Entity',
+          message: 'Validation failed',
+          details,
+        });
       },
     }),
   );
 
+  app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new CustomExceptionFilter());
 
   app.use(helmet());
