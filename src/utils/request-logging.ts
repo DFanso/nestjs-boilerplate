@@ -1,5 +1,5 @@
 import { Logger, INestApplication } from '@nestjs/common';
-import * as morgan from 'morgan';
+import morgan = require('morgan');
 
 export function useRequestLogging(app: INestApplication) {
   const logger = new Logger('Request');

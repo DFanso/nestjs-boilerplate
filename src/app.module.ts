@@ -22,7 +22,14 @@ import { UsersModule } from './users/users.module';
         NODE_ENV: Joi.string().required(),
         JWT_PRIVATE_KEY_PATH: Joi.string().required(),
         JWT_PUBLIC_KEY_PATH: Joi.string().required(),
-        ALLOWED_ORIGINS: Joi.string().optional().default('http://localhost:3000'),
+        AUTH_EXCHANGE_SECRET: Joi.string()
+          .optional()
+          .default('local-auth-exchange-secret-please-change'),
+        ACCESS_TOKEN_TTL: Joi.string().optional().default('15m'),
+        REFRESH_TOKEN_TTL: Joi.string().optional().default('30d'),
+        ALLOWED_ORIGINS: Joi.string()
+          .optional()
+          .default('http://localhost:3000'),
         DATABASE_URL: Joi.string().required(),
         // DIRECT_URL: Joi.string().optional(), // Optional: Only needed for cloud databases like Supabase
       }),
