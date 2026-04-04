@@ -22,6 +22,11 @@ import { UsersModule } from './users/users.module';
         NODE_ENV: Joi.string().required(),
         JWT_PRIVATE_KEY_PATH: Joi.string().required(),
         JWT_PUBLIC_KEY_PATH: Joi.string().required(),
+        AUTH_EXCHANGE_SECRET: Joi.string()
+          .optional()
+          .default('local-auth-exchange-secret-please-change'),
+        ACCESS_TOKEN_TTL: Joi.string().optional().default('15m'),
+        REFRESH_TOKEN_TTL: Joi.string().optional().default('30d'),
         ALLOWED_ORIGINS: Joi.string()
           .optional()
           .default('http://localhost:3000'),

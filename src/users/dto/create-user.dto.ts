@@ -1,10 +1,12 @@
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
   MinLength,
+  IsUrl,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -30,6 +32,15 @@ export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+
+  @ApiProperty({
+    example: 'https://cdn.example.com/avatars/jane.png',
+    description: 'Optional avatar URL for the user',
+    required: false,
+  })
+  @IsOptional()
+  @IsUrl()
+  avatar?: string;
 
   @ApiProperty({
     example: 'password123',

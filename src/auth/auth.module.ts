@@ -7,6 +7,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import * as fs from 'fs';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { ExchangeSecretGuard } from './exchange-secret.guard';
 import { JwtStrategy } from './jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { ClsModule } from 'nestjs-cls';
@@ -36,7 +37,7 @@ import { ClsModule } from 'nestjs-cls';
     UsersModule,
     ClsModule,
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, ExchangeSecretGuard],
   controllers: [AuthController],
 })
 export class AuthModule {}
