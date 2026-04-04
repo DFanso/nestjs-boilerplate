@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -9,8 +13,13 @@ export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserWithRoles> {
-    const existingUser = await this.usersRepository.existsByEmail(createUserDto.email);
-    if (existingUser) {
+    const normalizedEmail = this.normalizeEmail(createUserDto.email);
+    const normalizedUsername = this.normalizeUsername(createUserDto.username);
+
+    const existingEmail =
+      await this.usersRepository.existsByEmail(normalizedEmail);
+
+    if (existingEmail) {
       throw new ConflictException('User with this email already exists');
     }
 
@@ -18,12 +27,14 @@ export class UsersService {
 
     return this.usersRepository.create({
       ...createUserDto,
+      email: normalizedEmail,
+      username: normalizedUsername,
       password: hashedPassword,
     });
   }
 
   async findByEmail(email: string): Promise<UserWithRoles | null> {
-    return this.usersRepository.findByEmail(email);
+    return this.usersRepository.findByEmail(this.normalizeEmail(email));
   }
 
   async findById(id: string): Promise<UserWithRoles> {
@@ -38,7 +49,10 @@ export class UsersService {
     return this.usersRepository.findOne(filter);
   }
 
-  async updateUser(id: string, updateData: Partial<User>): Promise<UserWithRoles> {
+  async updateUser(
+    id: string,
+    updateData: Partial<User>,
+  ): Promise<UserWithRoles> {
     // Business logic: Ensure user exists
     await this.findById(id);
 
@@ -57,9 +71,17 @@ export class UsersService {
     return this.usersRepository.delete(id);
   }
 
-  async getUsers(page: number = 1, limit: number = 10): Promise<{ users: UserWithRoles[]; total: number; page: number; totalPages: number }> {
+  async getUsers(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
+    users: UserWithRoles[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
     const skip = (page - 1) * limit;
-    
+
     // Business logic: Get paginated results
     const [users, total] = await Promise.all([
       this.usersRepository.findMany(skip, limit),
@@ -74,8 +96,14 @@ export class UsersService {
     };
   }
 
-  async validateUserPassword(email: string, password: string): Promise<UserWithRoles | null> {
-    const user = await this.usersRepository.findByEmail(email);
+  async validateUserPassword(
+    email: string,
+    password: string,
+  ): Promise<UserWithRoles | null> {
+    const user = await this.usersRepository.findByEmail(
+      this.normalizeEmail(email),
+    );
+
     if (!user) {
       return null;
     }
@@ -84,4 +112,12 @@ export class UsersService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     return isPasswordValid ? user : null;
   }
-} 
+
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
+  }
+
+  private normalizeUsername(username: string): string {
+    return username.trim().split(/\s+/).filter(Boolean).join(' ');
+  }
+}

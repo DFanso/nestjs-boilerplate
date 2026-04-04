@@ -9,10 +9,13 @@ export type UserWithRoles = User & { roles: UserRole[] };
 export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(userData: CreateUserDto & { password: string }): Promise<UserWithRoles> {
+  async create(
+    userData: CreateUserDto & { password: string },
+  ): Promise<UserWithRoles> {
     return this.prisma.user.create({
       data: {
         email: userData.email,
+        username: userData.username,
         password: userData.password,
         roles: {
           create: [
@@ -98,4 +101,4 @@ export class UsersRepository {
     });
     return !!user;
   }
-} 
+}

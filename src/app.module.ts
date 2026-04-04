@@ -22,7 +22,9 @@ import { UsersModule } from './users/users.module';
         NODE_ENV: Joi.string().required(),
         JWT_PRIVATE_KEY_PATH: Joi.string().required(),
         JWT_PUBLIC_KEY_PATH: Joi.string().required(),
-        ALLOWED_ORIGINS: Joi.string().optional().default('http://localhost:3000'),
+        ALLOWED_ORIGINS: Joi.string()
+          .optional()
+          .default('http://localhost:3000'),
         DATABASE_URL: Joi.string().required(),
         // DIRECT_URL: Joi.string().optional(), // Optional: Only needed for cloud databases like Supabase
       }),

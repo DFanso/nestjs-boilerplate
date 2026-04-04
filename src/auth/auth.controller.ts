@@ -1,11 +1,25 @@
-import { Controller, Post, Body, Get, UseGuards, Request, Version } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
-import { ClsService } from 'nestjs-cls';
+import { Roles } from './decorators/roles.decorator';
+import { AuthenticatedUser } from './interfaces/authenticated-user.interface';
+import { Role } from '../types/role.enum';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { RolesGuard } from './roles.guard';
 
 @ApiTags('auth')
 @Controller({
@@ -13,10 +27,7 @@ import { ClsService } from 'nestjs-cls';
   version: '1',
 })
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly clsService: ClsService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
@@ -34,14 +45,14 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('profile')
   @ApiBearerAuth()
+  @Roles(Role.USER, Role.ADMIN)
   @ApiOperation({ summary: 'Get user profile' })
   @ApiResponse({ status: 200, description: 'Returns user profile.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async getProfile(@Request() req) {
-    const context = this.clsService.get('user');
-    return this.authService.getProfile(context.id);
+  async getProfile(@Request() req: { user: AuthenticatedUser }) {
+    return this.authService.getProfile(req.user.id);
   }
-} 
+}
