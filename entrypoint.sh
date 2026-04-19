@@ -9,12 +9,10 @@ npx prisma migrate deploy
 
 echo "✅ Migrations completed successfully"
 
-# Run database seed (optional - skip if seed file doesn't exist)
-if [ -f "prisma/seed.ts" ]; then
-  echo "🌱 Running database seed..."
-  npx ts-node --transpile-only prisma/seed.ts || echo "⚠️ Seed skipped or already applied"
-  echo "✅ Database seeding completed"
-fi
+# Run database seed
+echo "🌱 Running database seed..."
+npx prisma db seed || echo "⚠️ Seed skipped or failed"
+echo "✅ Database seeding completed"
 
 # Start the application
 echo "🚀 Starting application..."

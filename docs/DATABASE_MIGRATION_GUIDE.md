@@ -17,6 +17,7 @@ This guide covers database operations, migrations, and schema management for the
 - Supabase project set up
 - Environment variables configured
 - Prisma CLI installed (`bunx prisma` or global installation)
+- `tsx` (declared as a dependency) — runs the TypeScript seed (`prisma/seed.ts`) when you run `bunx prisma db seed` or the Docker entrypoint
 
 ## Environment Setup
 
@@ -199,57 +200,66 @@ bunx prisma migrate dev --name add_username_field
 
 ### 3. Data Seeding
 
-Create a seed script `prisma/seed.ts`:
+The project ships with `prisma/seed.ts`, which creates an **idempotent** admin user (hashed password via `bcrypt`, `ADMIN` role). Credentials come from optional env vars: `ADMIN_EMAIL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` (see `.env.example`).
+
+Core pattern (simplified):
 
 ```typescript
+import 'dotenv/config';
 import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10);
-  
-  const adminUser = await prisma.user.create({
-    data: {
-      email: 'admin@example.com',
-      password: hashedPassword,
-      roles: {
-        create: [
-          { role: Role.ADMIN },
-          { role: Role.USER },
-        ],
-      },
+  const email = process.env.ADMIN_EMAIL ?? 'admin@example.com';
+  const username = process.env.ADMIN_USERNAME ?? 'admin';
+  const password = process.env.ADMIN_PASSWORD ?? 'ChangeMe123!';
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {},
+    create: {
+      email,
+      username,
+      password: passwordHash,
+      roles: { create: { role: Role.ADMIN } },
     },
   });
 
-  console.log('Created admin user:', adminUser);
+  const hasAdmin = await prisma.userRole.findFirst({
+    where: { userId: user.id, role: Role.ADMIN },
+  });
+  if (!hasAdmin) {
+    await prisma.userRole.create({
+      data: { userId: user.id, role: Role.ADMIN },
+    });
+  }
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
   .finally(async () => {
     await prisma.$disconnect();
   });
 ```
 
-Run seed:
+Configure the seed command in **`prisma.config.ts`** (Prisma 7+), not `package.json`:
+
+```typescript
+migrations: {
+  path: 'prisma/migrations',
+  seed: 'tsx prisma/seed.ts',
+},
+```
+
+Run seed explicitly:
+
 ```bash
 bunx prisma db seed
 ```
 
-Add to `package.json`:
-```json
-{
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
-  }
-}
-```
+**Prisma 7:** `prisma db seed` is **not** run automatically by `prisma migrate dev` or `prisma migrate reset`; call it yourself when you need seed data (the Docker `entrypoint.sh` runs it after `prisma migrate deploy`).
 
 ## Troubleshooting
 
